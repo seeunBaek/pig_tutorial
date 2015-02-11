@@ -1,0 +1,349 @@
+<html>
+
+<head>
+
+<title> Pig_tutorial </title>
+
+</head>
+
+<body>
+<style>
+ body { background-image : url("http://blogfiles.naver.net/20150201_187/drivesol_1422789780016gfVwj_PNG/wb3.png");
+      background-position : 50% 50% ;
+      background-attachment : fixed ;
+      background-repeat : no-repeat; }
+   </style>
+<font face="Arial" size="5">
+
+<b> <"Tutorial Overview"> </b> </font>
+
+<font face="Arial" size="3">
+
+<p>This tutorial will enable you to gain a knowledge of Pig In this tutorial, you will first read in two data files that contain New York Stock Exchange dividend prices and stock prices, and then use these files to perform a number of Pig operations including: </p>
+
+<p>
+- Define a relation with schema <br>
+- Define a new relation from an existing relation <br>
+- Select specific columns from within a relation <br>
+- Join two relations <br>
+- Sort the data using ‘ORDER BY’<br>
+- FILTER and Group the data using ‘GROUP BY’<br>
+</p>
+</font><br><br>
+
+<font face="Arial" size="5">
+<b><"What is Pig?"></b></font>
+
+
+<font face="Arial" size="3">
+
+<p>Pig is another high-level abstraction on top of MapReduce. Pig provides a scripting language known as Pig Latin. It is composed of operations that are applied to the input data to produce output. Language will be relatively easy to learn for people experienced in Perl, Ruby, or other scripting languages. It is easy to write complex tasks such as joins of multiple datasets.</p>
+</font><br><br>
+
+<font face="Arial" size="5">
+<b><"Download the Data"></b></font><br><br>
+
+<font face="Arial" size="3">
+1.Make a directory in local and change the directory using ‘cd’ command. 
+<P><IMG id=se_object_142340558727615351 title=1.PNG class=__se_object style="HEIGHT: 88px; WIDTH: 550px; rwidth: 550px; rheight: 88px" src="http://blogfiles.naver.net/20150208_208/pjky67_1423405570395klyml_PNG/1.PNG" width=550 height=88 rwidth="550" rheight="88" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+<br>
+2.Download sample data from the following location using ‘wget’ command : <br>
+https://s3.amazonaws.com/hw-sandbox/tutorial1/infochimps_dataset_4778_download_16677-csv.zip <br>
+because you need the sample data for this tutorial.
+<P><IMG id=se_object_142340684153396692 title=2.PNG class=__se_object style="HEIGHT: 180px; WIDTH: 550px; rwidth: 550px; rheight: 180px" src="http://blogfiles.naver.net/20150208_96/pjky67_1423406824675T73Hl_PNG/2.PNG" width=550 height=180 rwidth="550" rheight="180" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"><BR style="CLEAR: both"><BR style="CLEAR: both"><IMG id=se_object_142340684226839080 title=2.PNG class=__se_object style="HEIGHT: 180px; WIDTH: 550px; rwidth: 550px; rheight: 180px" src="http://blogfiles.naver.net/20150208_225/pjky67_1423406825407V9YHn_PNG/2.PNG" width=550 height=180 rwidth="550" rheight="180" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+<br>
+3.You can check the zip file using ‘ls'command.
+<P><IMG id=se_object_142340715270143707 title=3.PNG class=__se_object style="HEIGHT: 41px; WIDTH: 550px; rwidth: 550px; rheight: 41px" src="http://blogfiles.naver.net/20150208_113/pjky67_1423407135816e0B9t_PNG/3.PNG" width=550 height=41 rwidth="550" rheight="41" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+<br>
+4.Unzip the zip file using ‘unzip command.
+<p><IMG id=se_object_142340715270143707 title=3.PNG class=__se_object style="HEIGHT: 41px; WIDTH: 550px; rwidth: 550px; rheight: 41px" src="http://blogfiles.naver.net/20150208_113/pjky67_1423407135816e0B9t_PNG/3.PNG" width=550 height=41 rwidth="550" rheight="41" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+<br>
+5.Get the data from local into HDFS using ‘sudo -u hdfs hadoop fs -copyFromLocal ~ /user/cloudera' command.
+<P><IMG id=se_object_142340740982920380 title=6.PNG class=__se_object style="HEIGHT: 38px; WIDTH: 550px; rwidth: 550px; rheight: 38px" src="http://blogfiles.naver.net/20150208_205/pjky67_1423407392934UyUEy_PNG/6.PNG" width=550 height=38 rwidth="550" rheight="38" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+<br>
+6.Click the FireFox and go to the HUE. Then, you can check the result in File Browser.
+<P><IMG id=se_object_142340756131883298 title=7.PNG class=__se_object style="HEIGHT: 244px; WIDTH: 550px; rwidth: 550px; rheight: 244px" src="http://blogfiles.naver.net/20150208_144/pjky67_1423407544274wGiJz_PNG/7.PNG" width=550 height=244 rwidth="550" rheight="244" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+<br>
+7.We will make two different directories to arrange two kinds of files(daily_prices, dividends) for convenience. *However, you can skip this step.*
+<P><IMG id=se_object_142340792540072534 title=8-1.PNG class=__se_object style="HEIGHT: 22px; WIDTH: 445px; rwidth: 445px; rheight: 22px" src="http://blogfiles.naver.net/20150209_3/pjky67_1423407908310CPIep_PNG/8-1.PNG" width=445 height=22 rwidth="445" rheight="22" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+<P>&nbsp;</P>
+<P><IMG id=se_object_142340795135769997 title=8-2.PNG class=__se_object style="HEIGHT: 20px; WIDTH: 442px; rwidth: 442px; rheight: 20px" src="http://blogfiles.naver.net/20150209_117/pjky67_1423407934131baJM7_PNG/8-2.PNG" width=442 height=20 rwidth="442" rheight="20" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+<P>&nbsp;</P>
+<P><IMG id=se_object_142340796742494110 title=9.PNG class=__se_object style="HEIGHT: 259px; WIDTH: 550px; rwidth: 550px; rheight: 259px" src="http://blogfiles.naver.net/20150209_25/pjky67_1423407950480PwaU8_PNG/9.PNG" width=550 height=259 rwidth="550" rheight="259" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+<br>
+</font>
+
+
+<font face="Arial" size="5">
+<b><"Install Pig"></b></font><br><br>
+<font face="Arial" size="3">
+8.To install pig, run ‘sudo yum install pig' command.
+<P><IMG id=se_object_142340820423520405 title=12.PNG class=__se_object style="HEIGHT: 354px; BORDER-TOP-COLOR: rgb(0,0,0); BORDER-BOTTOM-COLOR: rgb(0,0,0); BORDER-RIGHT-COLOR: rgb(0,0,0); WIDTH: 550px; BORDER-LEFT-COLOR: rgb(0,0,0); rwidth: 550px; rheight: 354px" src="http://blogfiles.naver.net/20150209_93/pjky67_1423408187280rSirU_PNG/12.PNG" width=550 height=354 rwidth="550" rheight="354" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment" sQEId="QE_142340820953989385"></P>
+<P>&nbsp;</P>
+<P><IMG id=se_object_142340823807612444 title=13.PNG class=__se_object style="HEIGHT: 281px; WIDTH: 550px; rwidth: 550px; rheight: 281px" src="http://blogfiles.naver.net/20150209_157/pjky67_1423408221196pcTgl_PNG/13.PNG" width=550 height=281 rwidth="550" rheight="281" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+<br>
+9.If you can see ‘grunt>’, you are using pig 
+<P><IMG id=se_object_142340838329813742 title=14.PNG class=__se_object style="HEIGHT: 35px; WIDTH: 268px; rwidth: 268px; rheight: 35px" src="http://blogfiles.naver.net/20150209_227/pjky67_1423408366410Av78J_PNG/14.PNG" width=268 height=35 rwidth="268" rheight="35" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+<br>
+</font>
+<font face="Arial" size="5">
+<b><"Define a Relation with a Schema."></b></font><br><br>
+<font face="Arial" size="3">
+10.Use the “AS” clause to define a schema for the daily stock price data. The code is as follows.
+
+<br><br>
+<table style="border: 0.28pt solid rgb(0, 0, 0); border-collapse: collapse;">
+<tbody><tr>
+<td style="border: 0.28pt solid rgb(0, 0, 0); padding: 1.41pt 5.1pt; background: rgb(242, 242, 242) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial; width: 600pt; height: 20pt;" valign="top">
+STOCK_A = LOAD 'NYSE_daily_prices_A.csv' using PigStorage(',') AS (exchange:chararray, symbol:chararray, date:chararray, open:float, high:float, low:float, close:float, volume:int, adj_close:float); DESCRIBE STOCK_A;
+</td>
+</tr></tbody></table>
+<br>Result :<P><IMG id=se_object_142340877126840758 title=17.PNG class=__se_object style="HEIGHT: 48px; WIDTH: 550px; rwidth: 550px; rheight: 48px" src="http://blogfiles.naver.net/20150209_264/pjky67_1423408754419gK4Oq_PNG/17.PNG" width=550 height=48 rwidth="550" rheight="48" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+</font>
+<font face="Arial" size="5">
+<b><"Define a new relation from an existing relation."></b></font><br><br>
+<font face="Arial" size="3">
+11.Define a new B relation, which is a collection of 100 entries (arbitrarily selected) from the STOCK_A  relation. The code is as follows.
+<br><br>
+<table style="border: 0.28pt solid rgb(0, 0, 0); border-collapse: collapse;">
+<tbody><tr>
+<td style="border: 0.28pt solid rgb(0, 0, 0); padding: 1.41pt 5.1pt; background: rgb(242, 242, 242) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial; width: 600pt; height: 20pt;" valign="top">
+B = LIMIT STOCK_A 100; DESCRIBE B;
+</td>
+</tr></tbody></table>
+<br>Result : <P><IMG id=se_object_142340904641718166 title=16.PNG class=__se_object style="HEIGHT: 71px; WIDTH: 550px; rwidth: 550px; rheight: 71px" src="http://blogfiles.naver.net/20150209_148/pjky67_1423409029479YuTQ1_PNG/16.PNG" width=550 height=71 rwidth="550" rheight="71" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+</font><br><Br>
+
+<font face="Arial" size="5">
+<b><"View the Data"></b></font><br><br>
+<font face="Arial" size="3">
+12.To view the data of a relation, use the ‘Dump’command. 
+<br><br>
+<table style="border: 0.28pt solid rgb(0, 0, 0); border-collapse: collapse;">
+<tbody><tr>
+<td style="border: 0.28pt solid rgb(0, 0, 0); padding: 1.41pt 5.1pt; background: rgb(242, 242, 242) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial; width: 600pt; height: 20pt;" valign="top">
+Dump B;
+</td>
+</tr></tbody></table>
+<br>The command requires a MapReduce job.<br>
+The result shows 100 entries from the contents of NYSE_daily_prices_A.csv. (and not necessarily the ones shown below, because again, entries are arbitrarily chosen)
+<br>Result : 
+<P><IMG id=se_object_142340920586739825 title=19.PNG class=__se_object style="HEIGHT: 440px; WIDTH: 517px; rwidth: 517px; rheight: 440px" src="http://blogfiles.naver.net/20150209_172/pjky67_1423409188987JozUS_PNG/19.PNG" width=517 height=440 rwidth="517" rheight="440" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></P>
+<font face="Arial" size="3">
+
+
+
+<font face="Arial" size="5">
+<B> < "Select Specific Columns from a relation" > </B> <br>
+
+
+<font face="Arial" size="3">
+13. You will select specific columns from relation B.<br>
+SO, define a new relation C, which contain only the symbol, date and 
+close fields,	<br><br>
+
+
+<table style="border: 0.28pt solid rgb(0, 0, 0); border-collapse: collapse;">
+<tbody><tr>
+<td style="border: 0.28pt solid rgb(0, 0, 0); padding: 1.41pt 5.1pt; background: rgb(242, 242, 242) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial; width: 600pt; height: 20pt;" valign="top">
+
+
+STOCK_A = LOAD 'NYSE_daily_prices_A.csv' using PigStorage(',') 
+AS (exchange:chararray, symbol:chararray, date:chararray, open:float, high:float, low:float, close:float, volume:int, adj_close:float); <br>
+B = LIMIT STOCK_A 100; <br>
+C = FOREACH B GENERATE symbol, date, close; <br>
+DESCRIBE C; <br><br>
+
+</td>
+</tr></tbody></table><br>
+
+Result :  <p><img width="663" height="124" title="21.PNG" align="" class="__se_object" id="se_object_142343714485658117" style="width: 663px; height: 124px; rwidth: 663px; rheight: 124px;" src="http://blogfiles.naver.net/20150209_284/blue91822_1423437101592kUA8S_PNG/21.PNG" rwidth="663" rheight="124" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"><br></p> <br><br>
+
+<font face="Arial" size="5">
+<B> < "Store relationship data into a HDFS File" > </B> <br>
+
+
+
+<font face="Arial" size="3">
+14.You will use the STORE command. <br>
+STORE command outputs a relation into a new file in HDFS. <br>
+And, this requires a MapReduce job.<br><br>
+
+
+<table style="border: 0.28pt solid rgb(0, 0, 0); border-collapse: collapse;">
+<tbody><tr>
+<td style="border: 0.28pt solid rgb(0, 0, 0); padding: 1.41pt 5.1pt; background: rgb(242, 242, 242) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial; width: 600pt; height: 20pt;" valign="top">
+
+STORE C INTO 'output/C'; <br><br>
+</td>
+</tr></tbody></table><br>
+
+<img width="663" height="124" title="21.PNG" align="" class="__se_object" id="se_object_142343714485658117" style="width: 663px; height: 124px; rwidth: 663px; rheight: 124px;" src="http://blogfiles.naver.net/20150209_284/blue91822_1423437101592kUA8S_PNG/21.PNG" rwidth="663" rheight="124" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment">&nbsp;</p>
+
+
+
+
+<br>
+
+<p><img width="740" height="331" title="20.PNG" align="" class="__se_object" id="se_object_142343726296277792" style="width: 740px; height: 331px; rwidth: 740px; rheight: 331px;" src="http://blogfiles.naver.net/20150209_166/blue91822_14234372196095rSm0_PNG/20.PNG" rwidth="740" rheight="331" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></p>
+
+<br>
+You can find a folder named "output" in File Browser. <br>
+
+
+
+Click on "output" folder. There is a "C" subfolder.<br>
+Click on "C" folder, you will find an output file called"part-r-00000"<Br>
+
+Result :   <p><img width="740" height="251" title="25.PNG" align="" class="__se_object" id="se_object_142343734707498593" style="width: 740px; height: 251px; rwidth: 740px; rheight: 251px;" src="http://blogfiles.naver.net/20150209_53/blue91822_1423437303800uRnod_PNG/25.PNG" rwidth="740" rheight="251" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></p><p><br></p> <br><br>
+
+
+If you click on the file "part-r-00000", you can check result.<br><Br>
+
+
+
+<font face="Arial" size="5">
+<B>  < "Perform a join between 2 relations" > </B> <br><br>
+
+
+
+<font face="Arial" size="3">
+"JOIN" combined the records from multiple tables within a database as a column.<br>
+JOIN is a means for combininbg the fields by using each of the common value in the two 
+tables. <br><br><br><br><br>
+
+
+
+In this step, you will perform a join on two NYSE data sets : the daily prices
+and the dividend prices. <br>
+DIvidends prices shows for the quarter ad stock prices show on a daily basis.<Br>
+
+
+Result : <p><img width="740" height="256" title="26.PNG" align="" class="__se_object" id="se_object_142343836742456273" style="width: 740px; height: 256px; rwidth: 740px; rheight: 256px;" src="http://blogfiles.naver.net/20150209_56/blue91822_1423438324193gaj95_PNG/26.PNG" jsonvalue="%7B%7D" imgqe="true" rwidth="740" rheight="256" s_subtype="photo" s_type="attachment"></p><p><br></p><p><br></p><br><Br>
+
+<p><img width="499" height="463" title="27.PNG" align="" class="__se_object" id="se_object_142343839807842725" style="width: 499px; height: 463px; rwidth: 499px; rheight: 463px;" src="http://blogfiles.naver.net/20150209_149/blue91822_1423438354865JKDTl_PNG/27.PNG" jsonvalue="%7B%7D" imgqe="true" rwidth="499" rheight="463" s_subtype="photo" s_type="attachment"></p><p><br></p><p><br></p>
+<br><Br>
+
+
+15. 
+
+<table style="border: 0.28pt solid rgb(0, 0, 0); border-collapse: collapse;">
+<tbody><tr>
+<td style="border: 0.28pt solid rgb(0, 0, 0); padding: 1.41pt 5.1pt; background: rgb(242, 242, 242) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial; width: 600pt; height: 20pt;" valign="top">
+
+
+
+STOCK_A = LOAD 'NYSE_daily_prices_A.csv' using PigStorage(',') <br>
+AS (exchange:chararray, symbol:chararray, date:chararray, open:float, high:float, low:float, close:float, volume:int, adj_close:float); <br> 
+DIV_A = LOAD 'NYSE_dividends_A.csv' using PigStorage(',') AS (exchange:chararray, symbol:chararray, date:chararray, dividend:float); <Br>
+C = JOIN STOCK_A BY (symbol, date), DIV_A BY (symbol, date); <Br>
+DESCRIBE C;  <Br><Br><Br>
+
+</td>
+</tr></tbody></table><br>
+
+
+
+STOCK_A : a relation for the stocks <br>
+DIV_A : the dividends for stocks that start with an "A" <Br>
+You will define the new relation C.<Br>
+C : join A and B by both the symbol and date.<br>
+
+And use "DUMP" command to see the data stored in the relation C.<Br>
+
+<Br><Br>
+
+<font face="Arial" size="5">
+<B> < "Sort the data using “ORDER BY"”> </B><br><br>
+
+
+
+<font face="Arial" size="3">
+"OREDER BY" command sort the column or columns and is specified in the syntax
+of the end.<br><br>
+
+16. <Br><Br>
+
+
+<table style="border: 0.28pt solid rgb(0, 0, 0); border-collapse: collapse;">
+<tbody><tr>
+<td style="border: 0.28pt solid rgb(0, 0, 0); padding: 1.41pt 5.1pt; background: rgb(242, 242, 242) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial; width: 600pt; height: 20pt;" valign="top">
+
+DIV_A = LOAD 'NYSE_dividends_A.csv' using PigStorage(',') <br>
+AS (exchange:chararray, symbol:chararray, date:chararray, dividend:float); <Br>
+B = ORDER DIV_A BY symbol, date asc; <br>
+DUMP B; <br>
+
+
+</td>
+</tr></tbody></table><br>
+
+
+
+You will sort the dividends by symbol then date in ascending order.<br>
+
+ You can check the sorted data.<br><br>
+
+Result : <p><img width="740" height="67" title="오더바이_이거로.PNG" align="" class="__se_object" id="se_object_14234374104477759" style="width: 740px; height: 67px; rwidth: 740px; rheight: 67px;" src="http://blogfiles.naver.net/20150209_130/blue91822_1423437367200hl538_PNG/%BF%C0%B4%F5%B9%D9%C0%CC_%C0%CC%B0%C5%B7%CE.PNG" rwidth="740" rheight="67" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></p><p><br></p><p><br></p> <br><Br><br><br>
+<br>
+
+<p><img width="521" height="534" title="오더_바이_결과.PNG" align="" class="__se_object" id="se_object_14234374703989770" style="width: 521px; height: 534px; rwidth: 521px; rheight: 534px;" src="http://blogfiles.naver.net/20150209_122/blue91822_1423437427131TFNxX_PNG/%BF%C0%B4%F5_%B9%D9%C0%CC_%B0%E1%B0%FA.PNG" rwidth="521" rheight="534" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></p><p><br></p><p><br></p>
+
+
+
+<font face="Arial" size="5">
+<B>  < "Filter and Group the data using “GROUP BY"”> </B> <br>
+
+
+
+<font face="Arial" size="3">
+You will group the DIV_A relation by the dividend price for the "AZZ" stock. <br>
+
+17. <br>
+
+
+
+
+<table style="border: 0.28pt solid rgb(0, 0, 0); border-collapse: collapse;">
+<tbody><tr>
+<td style="border: 0.28pt solid rgb(0, 0, 0); padding: 1.41pt 5.1pt; background: rgb(242, 242, 242) none repeat scroll 0%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial; width: 600pt; height: 20pt;" valign="top">
+
+
+DIV_A = LOAD 'NYSE_dividends_A.csv' using PigStorage(',')<br>
+AS (exchange:chararray, symbol:chararray, date:chararray, dividend:float);<Br>
+B = FILTER DIV_A BY symbol=='AZZ';<Br>
+C = GROUP B BY dividend; <Br>
+DESCRIBE C; DUMP C; <br>
+
+
+</td>
+</tr></tbody></table><br>
+
+
+You can find the data for stock symbol "AZZ" is grouped together for
+each dividend.
+
+
+<br><br>
+
+Result : 
+
+<p><img width="740" height="138" title="28.PNG" align="" class="__se_object" id="se_object_142343808230620364" style="width: 740px; height: 138px; rwidth: 740px; rheight: 138px;" src="http://blogfiles.naver.net/20150209_16/blue91822_1423438039035VW653_PNG/28.PNG" rwidth="740" rheight="138" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></p><p><br></p><p><br></p><br><Br>
+
+
+<p><img width="740" height="464" title="29.PNG" align="" class="__se_object" id="se_object_142343814106429560" style="width: 740px; height: 464px; rwidth: 740px; rheight: 464px;" src="http://blogfiles.naver.net/20150209_221/blue91822_1423438097809dMHcH_PNG/29.PNG" rwidth="740" rheight="464" jsonvalue="%7B%7D" imgqe="true" s_subtype="photo" s_type="attachment"></p><p><br></p><p><br></p>
+ <br><Br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</font></font></body></html>
